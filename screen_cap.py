@@ -94,7 +94,7 @@ def roi(img, vertices):
     return masked
 
 def process_image(original_image):
-    processed_img = cv2.cvtColor(original_image, cv2.COLOR_BGR2GRAY)
+    processed_img = cv2.cvtColor(original_image, cv2.COLOR_BGR2HSV)
     processed_img = cv2.GaussianBlur(processed_img, (15,15), 0)
     processed_img = cv2.Canny(processed_img, threshold1 = 30, threshold2=150)
     vertices = np.array([[120,1131], [642,564], [1278,573], [2008, 1115]])
