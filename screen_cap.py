@@ -75,7 +75,6 @@ def draw_lines(img, lines):
     except:
        pass
 
-
 def roi(img, vertices):
     mask = np.zeros_like(img)
     cv2.fillPoly(mask, vertices, 255)
@@ -86,7 +85,7 @@ def process_image(original_image):
     processed_img = cv2.cvtColor(original_image, cv2.COLOR_BGR2GRAY)
     processed_img = cv2.GaussianBlur(processed_img, (5,5), 0)
     processed_img = cv2.Canny(processed_img, threshold1 = 150, threshold2=175)
-    vertices = np.array([[320,1131], [842,564], [1078,573], [1808, 1115]])
+    vertices = np.array([[220,1131], [742,564], [1178,573], [1908, 1115]])
     processed_img = roi(processed_img, [vertices] )
     lines = cv2.HoughLinesP(processed_img, 1, np.pi/180, 180, np.array([]), 100, 5)
     
@@ -101,7 +100,7 @@ def run_screen_capture(region):
         image = pyautogui.screenshot(region=region)
         print("Time took: {}".format(time.time() - start))
         
-        cv2.imshow('image', process_image(np.array(image)))
+        cv2.imshow('image', np.array(image))#process_image(np.array(image)))
         if cv2.waitKey(25) & 0xFF == ord('q'):
             cv2.destroyAllWindows()
             break
