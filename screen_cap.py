@@ -52,7 +52,7 @@ def make_line_points(y1, y2, line):
         y2 = int(y2)
         return ((x1, y1), (x2, y2))
         
-    except
+    except:
         #return garbage
         return ((2,2), (3,3))
 
