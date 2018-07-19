@@ -100,7 +100,7 @@ def run_screen_capture(region):
         image = pyautogui.screenshot(region=region)
         print("Time took: {}".format(time.time() - start))
         
-        cv2.imshow('image', np.array(image))#process_image(np.array(image)))
+        cv2.imshow('image', process_image(np.array(image)))
         if cv2.waitKey(25) & 0xFF == ord('q'):
             cv2.destroyAllWindows()
             break
