@@ -2,3 +2,6 @@
 **/.Python
 venv/
 .idea/
+**/.python-version
+**/.Python
+**/training_data-*
