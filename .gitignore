@@ -2,3 +2,7 @@
 **/.Python
 venv/
 .idea/
+python_venv/
+__pycache__/
+linux_venv/
+python_venv
