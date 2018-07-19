@@ -89,11 +89,11 @@ def draw_lanes(img, lines):
 
 def select_rgb_white_yellow(image): 
     # white color mask
-    lower = np.uint8([150, 150, 150])
+    lower = np.uint8([125, 125, 125])
     upper = np.uint8([255, 255, 255])
     white_mask = cv2.inRange(image, lower, upper)
     # yellow color mask
-    lower = np.uint8([190, 190,   0])
+    lower = np.uint8([100, 100,   0])
     upper = np.uint8([255, 255, 255])
     yellow_mask = cv2.inRange(image, lower, upper)
     # combine the mask
@@ -102,15 +102,15 @@ def select_rgb_white_yellow(image):
     return masked
 
 def select_white_yellow(image):
-    converted = convert_hls(image)
+    #converted = convert_hls(image)
     # white color mask
     lower = np.uint8([  0, 200,   0])
     upper = np.uint8([255, 255, 255])
-    white_mask = cv2.inRange(converted, lower, upper)
+    white_mask = cv2.inRange(image, lower, upper)
     # yellow color mask
     lower = np.uint8([ 10,   0, 100])
     upper = np.uint8([ 40, 255, 255])
-    yellow_mask = cv2.inRange(converted, lower, upper)
+    yellow_mask = cv2.inRange(image, lower, upper)
     # combine the mask
     mask = cv2.bitwise_or(white_mask, yellow_mask)
     return cv2.bitwise_and(image, image, mask = mask)
@@ -121,12 +121,28 @@ def roi(img, vertices):
     masked = cv2.bitwise_and(img, mask)
     return masked
 
+def auto_canny(image, sigma=0.33):
+    # compute the median of the single channel pixel intensities
+    v = np.median(image)
+ 
+    # apply automatic Canny edge detection using the computed median
+    lower = int(max(0, (1.0 - sigma) * v))
+    upper = int(min(255, (1.0 + sigma) * v))
+    edged = cv2.Canny(image, lower, upper)
+ 
+    # return the edged image
+    return edged
+
+def get_running_average():
+    pass
+
 def process_image(original_image):
     processed_img = cv2.cvtColor(original_image, cv2.COLOR_RGB2HLS)
-    processed_img = select_rgb_white_yellow(original_image)
-    processed_img = cv2.GaussianBlur(processed_img, (15,15), 0)
-    processed_img = cv2.Canny(processed_img, threshold1 = 30, threshold2=150)
-    vertices = np.array([[120,1131], [642,564], [1278,573], [2008, 1115]])
+    #processed_img = select_rgb_white_yellow(processed_img)
+    processed_img = cv2.GaussianBlur(processed_img, (19,19), 0)
+    # rocessed_img = cv2.Canny(processed_img, threshold1 = 30, threshold2=150)p
+    processed_img = auto_canny(processed_img);
+    vertices = np.array([[130,1131], [672,564], [1278,573], [2008, 1115]])
     processed_img = roi(processed_img, [vertices] )
     #lines = cv2.HoughLinesP(processed_img, 1, np.pi/180, 180, np.array([]), 150, 5)
     lines =  cv2.HoughLinesP(processed_img, rho=1, theta=np.pi/180, threshold=180, minLineLength=20, maxLineGap=300)
@@ -151,7 +167,7 @@ def run_screen_capture(region):
 if __name__ == "__main__":
     cv2.namedWindow('image', cv2.WINDOW_NORMAL)
     cv2.resizeWindow('image', 600,600)
-    cv2.imshow('image', process_image(cv2.imread('car5.PNG')))
+    cv2.imshow('image', process_image(cv2.imread('car4.PNG')))
     cv2.waitKey()
     cv2.destroyAllWindows()
     '''
