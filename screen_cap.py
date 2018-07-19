@@ -84,7 +84,7 @@ def roi(img, vertices):
 def process_image(original_image):
     processed_img = cv2.cvtColor(original_image, cv2.COLOR_BGR2GRAY)
     processed_img = cv2.GaussianBlur(processed_img, (5,5), 0)
-    processed_img = cv2.Canny(processed_img, threshold1 = 150, threshold2=175)
+    processed_img = cv2.Canny(processed_img, threshold1 = 50, threshold2=155)
     vertices = np.array([[120,1131], [642,564], [1278,573], [2008, 1115]])
     processed_img = roi(processed_img, [vertices] )
     lines = cv2.HoughLinesP(processed_img, 1, np.pi/180, 180, np.array([]), 100, 5)
@@ -107,12 +107,14 @@ def run_screen_capture(region):
 
 
 if __name__ == "__main__":
-    '''
+    ''''
     cv2.namedWindow('image', cv2.WINDOW_NORMAL)
     cv2.resizeWindow('image', 600,600)
-    cv2.imshow('image', process_image(cv2.imread('car3.PNG')))
+    cv2.imshow('image', process_image(cv2.imread('car5.PNG')))
     cv2.waitKey()
     cv2.destroyAllWindows()
+    
     '''
+
     region = (0,40, 1920, 1120)
     run_screen_capture(region)
