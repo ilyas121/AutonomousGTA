@@ -2,6 +2,7 @@ import numpy as np
 import cv2
 import time
 import pyautogui
+import argparse
 
 region = (0,40,800,640)
 
@@ -64,8 +65,14 @@ def lane_lines(image, lines):
     return left_line, right_line
 
     
-
 def draw_lines(img, lines):
+    try:
+        coords = line[0]
+        cv2.line(img, (coords[0],coords[1]), (coords[2],coords[3]), [0,0,255], 3)
+    except:
+        pass
+
+def draw_lanes(img, lines):
     print(lines)
     try:
         for line in list(lines):
@@ -90,8 +97,9 @@ def process_image(original_image):
     lines = cv2.HoughLinesP(processed_img, 1, np.pi/180, 180, np.array([]), 150, 5)
     
     lanes = lane_lines(processed_img, lines)
+    draw_lines(processed_img, lines)
 
-    draw_lines(processed_img, lanes)
+    draw_lanes(processed_img, lanes)
     return processed_img
 
 def run_screen_capture(region):
