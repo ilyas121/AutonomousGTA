@@ -87,6 +87,34 @@ def draw_lanes(img, lines):
     except:
        pass
 
+def select_rgb_white_yellow(image): 
+    # white color mask
+    lower = np.uint8([150, 150, 150])
+    upper = np.uint8([255, 255, 255])
+    white_mask = cv2.inRange(image, lower, upper)
+    # yellow color mask
+    lower = np.uint8([190, 190,   0])
+    upper = np.uint8([255, 255, 255])
+    yellow_mask = cv2.inRange(image, lower, upper)
+    # combine the mask
+    mask = cv2.bitwise_or(white_mask, yellow_mask)
+    masked = cv2.bitwise_and(image, image, mask = mask)
+    return masked
+
+def select_white_yellow(image):
+    converted = convert_hls(image)
+    # white color mask
+    lower = np.uint8([  0, 200,   0])
+    upper = np.uint8([255, 255, 255])
+    white_mask = cv2.inRange(converted, lower, upper)
+    # yellow color mask
+    lower = np.uint8([ 10,   0, 100])
+    upper = np.uint8([ 40, 255, 255])
+    yellow_mask = cv2.inRange(converted, lower, upper)
+    # combine the mask
+    mask = cv2.bitwise_or(white_mask, yellow_mask)
+    return cv2.bitwise_and(image, image, mask = mask)
+
 def roi(img, vertices):
     mask = np.zeros_like(img)
     cv2.fillPoly(mask, vertices, 255)
@@ -94,13 +122,14 @@ def roi(img, vertices):
     return masked
 
 def process_image(original_image):
-    processed_img = cv2.cvtColor(original_image, cv2.COLOR_BGR2HSV)
+    processed_img = cv2.cvtColor(original_image, cv2.COLOR_RGB2HLS)
+    processed_img = select_rgb_white_yellow(original_image)
     processed_img = cv2.GaussianBlur(processed_img, (15,15), 0)
     processed_img = cv2.Canny(processed_img, threshold1 = 30, threshold2=150)
     vertices = np.array([[120,1131], [642,564], [1278,573], [2008, 1115]])
     processed_img = roi(processed_img, [vertices] )
-    lines = cv2.HoughLinesP(processed_img, 1, np.pi/180, 180, np.array([]), 150, 5)
-    
+    #lines = cv2.HoughLinesP(processed_img, 1, np.pi/180, 180, np.array([]), 150, 5)
+    lines =  cv2.HoughLinesP(processed_img, rho=1, theta=np.pi/180, threshold=180, minLineLength=20, maxLineGap=300)
     lanes = lane_lines(processed_img, lines)
     draw_lines(processed_img, lines)
 
@@ -122,7 +151,7 @@ def run_screen_capture(region):
 if __name__ == "__main__":
     cv2.namedWindow('image', cv2.WINDOW_NORMAL)
     cv2.resizeWindow('image', 600,600)
-    cv2.imshow('image', process_image(cv2.imread('car3.PNG')))
+    cv2.imshow('image', process_image(cv2.imread('car5.PNG')))
     cv2.waitKey()
     cv2.destroyAllWindows()
     '''
