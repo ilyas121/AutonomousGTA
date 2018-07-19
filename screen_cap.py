@@ -67,8 +67,9 @@ def lane_lines(image, lines):
     
 def draw_lines(img, lines):
     try:
-        coords = line[0]
-        cv2.line(img, (coords[0],coords[1]), (coords[2],coords[3]), [0,0,255], 3)
+        for line in lines:
+            coords = line[0]
+            cv2.line(img, (coords[0],coords[1]), (coords[2],coords[3]), [0,0,255], 3)
     except:
         pass
 
