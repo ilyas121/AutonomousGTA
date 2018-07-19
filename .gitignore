@@ -5,3 +5,4 @@ venv/
 **/.python-version
 **/.Python
 **/training_data-*
+**/*.screenshot*
