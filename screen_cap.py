@@ -116,4 +116,3 @@ if __name__ == "__main__":
     '''
     region = (0,40, 1920, 1120)
     run_screen_capture(region)
-    '''
