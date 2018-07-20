@@ -2,30 +2,33 @@ import numpy as np
 import cv2
 import time
 import pyautogui
-import argparse
+import math
 
-region = (0,40,800,640)
+from directkeys import PressKey, ReleaseKey, W, A, S, D
+
+region = (0, 40, 800, 640)
+
 
 def average_slope_intercept(lines):
-    left_lines    = [] # (slope, intercept)
-    left_weights  = [] # (length,)
-    right_lines   = [] # (slope, intercept)
-    right_weights = [] # (length,)
+    left_lines    = []  # (slope, intercept)
+    left_weights  = []  # (length,)
+    right_lines   = []  # (slope, intercept)
+    right_weights = []  # (length,)
     
     try:
         for line in lines:
             for x1, y1, x2, y2 in line:
-                if x2==x1:
-                    continue # ignore a vertical line
+                if x2 == x1:
+                    continue  # ignore a vertical line
                 slope = (y2-y1)/(x2-x1)
                 intercept = y1 - slope*x1
                 length = np.sqrt((y2-y1)**2+(x2-x1)**2)
-                if slope < 0: # y is reversed in image
+                if slope < 0:  # y is reversed in image
                     left_lines.append((slope, intercept))
-                    left_weights.append((length))
+                    left_weights.append(length)
                 else:
                     right_lines.append((slope, intercept))
-                    right_weights.append((length))
+                    right_weights.append(length)
         
         # add more weight to longer lines    
         left_lane  = np.dot(left_weights,  left_lines) /np.sum(left_weights)  if len(left_weights) >0 else None
@@ -34,6 +37,7 @@ def average_slope_intercept(lines):
         return left_lane, right_lane # (slope, intercept), (slope, intercept)
     except:
         return (1,1), (1,1)
+
 
 def make_line_points(y1, y2, line):
     """
@@ -50,18 +54,18 @@ def make_line_points(y1, y2, line):
         x2 = int((y2 - intercept)/slope)
         y1 = int(y1)
         y2 = int(y2)
-        return ((x1, y1), (x2, y2))
+        return (x1, y1), (x2, y2)
         
     except:
-        #return garbage
-        return ((2,2), (3,3))
+        # return garbage
+        return (2,2), (3,3)
 
 
 def lane_lines(image, lines):
     left_lane, right_lane = average_slope_intercept(lines)
     
-    y1 = image.shape[0] # bottom of the image
-    y2 = y1*0.3         # slightly lower than the middle
+    y1 = image.shape[0]  # bottom of the image
+    y2 = y1*0.3          # slightly lower than the middle
 
     left_line  = make_line_points(y1, y2, left_lane)
     right_line = make_line_points(y1, y2, right_lane)
@@ -77,15 +81,17 @@ def draw_lines(img, lines):
     except:
         pass
 
+
 def draw_lanes(img, lines):
-    #print(lines)
+    # print(lines)
     try:
         for line in list(lines):
-            #print("Coords" + str(line))
+            # print("Coords" + str(line))
             coords = line
             cv2.line(img, line[0], line[1], [255,0, 0], 3)
     except:
-       pass
+        pass
+
 
 def roi(img, vertices):
     mask = np.zeros_like(img)
@@ -93,18 +99,49 @@ def roi(img, vertices):
     masked = cv2.bitwise_and(img, mask)
     return masked
 
+
 def process_image(original_image):
     processed_img = cv2.cvtColor(original_image, cv2.COLOR_BGR2HSV)
-    processed_img = cv2.GaussianBlur(processed_img, (13,13), 0)
-    processed_img = cv2.Canny(processed_img, threshold1 = 30, threshold2=150)
-    #vertices = np.array([[-580,1120], [640,575], [1280,575], [2500, 1120]])
-    vertices = np.array([[0,860], [840,480], [1080,480], [1920, 860]])
+    processed_img = cv2.GaussianBlur(processed_img, (13, 13), 0)
+    processed_img = cv2.Canny(processed_img, threshold1=30, threshold2=150)
+    # vertices = np.array([[-580,1120], [640,575], [1280,575], [2500, 1120]])
+    vertices = np.array([[0, 860], [840, 480], [1080, 480], [1920, 860]])
     processed_img = roi(processed_img, [vertices])
 
     return processed_img
 
+
 def get_lines(img):
     return cv2.HoughLinesP(img, 1, np.pi / 180, 180, np.array([]), 150, 5)
+
+
+# Whether or not to actually trigger keystrokes
+do_key_presses = False
+
+
+def turn_left():
+    # Turn left
+    print("left")
+    print()
+    if do_key_presses: ReleaseKey(D)
+    if do_key_presses: PressKey(A)
+
+
+def turn_right():
+    # Turn right
+    print("right")
+    print()
+    if do_key_presses: ReleaseKey(A)
+    if do_key_presses: PressKey(D)
+
+
+def turn_straight():
+    # Don't turn
+    print("straight")
+    print()
+    if do_key_presses: ReleaseKey(A)
+    if do_key_presses: ReleaseKey(D)
+
 
 def handle_image(image):
     processed_image = process_image(np.array(image))
@@ -114,10 +151,77 @@ def handle_image(image):
     draw_lines(processed_image, lines)
     draw_lanes(processed_image, lanes)
 
-    print(lanes)
+    lane1 = lanes[0]
+    lane2 = lanes[1]
 
-    cv2.imshow('image', image)
-    cv2.imshow('image2', processed_image)
+    slope1 = 0
+    slope2 = 0
+
+    xintercept1 = 960
+    xintercept2 = 960
+
+    avgx1 = 960
+    avgx2 = 960
+
+    left_lane = None
+    right_lane = None
+    left_slope = 0
+    right_slope = 0
+
+    if lane1 is not None:
+        l1x1, l1y1, l1x2, l1y2 = lane1[0][0], lane1[0][1], lane1[1][0], lane1[1][1]
+
+        slope1 = (l1y2 - l1y1) / (l1x2 - l1x1)
+        yintercept1 = l1y1 - slope1 * l1x1
+        xintercept1 = yintercept1 / slope1
+        topintercept1 = xintercept1 + (1120 / slope1)
+        avgx1 = (xintercept1 + topintercept1) / 2
+
+    if lane2 is not None:
+        l2x1, l2y1, l2x2, l2y2 = lane2[0][0], lane2[0][1], lane2[1][0], lane2[1][1]
+
+        slope2 = (l2y2 - l2y1) / (l2x2 - l2x1)
+        yintercept2 = l2y1 - slope2 * l2x1
+        xintercept2 = yintercept2 / slope2
+        topintercept2 = xintercept2 + (1120 / slope2)
+        avgx2 = (xintercept2 + topintercept2) / 2
+
+    # Get Lanes
+    if xintercept1 < 960:
+        left_lane = lane1
+        left_slope = slope1
+    elif xintercept2 < 960:
+        left_lane = lane2
+        left_slope = slope2
+
+    if xintercept1 > 960:
+        right_lane = lane1
+        right_slope = slope1
+    elif xintercept2 > 960:
+        right_lane = lane2
+        right_slope = slope2
+
+    slope_tolerance = math.tan(20)
+    tolerance = 0.2
+
+    print("Slope1: {}".format(slope1))
+    print("AvgX1: {}".format(avgx1))
+    print("Slope2: {}".format(slope2))
+    print("AvgX2: {}".format(avgx2))
+
+    if 960 - (960 * tolerance) < avgx1 < 960 or 960 - (960 * tolerance) < avgx2 < 960\
+            or abs(left_slope) < slope_tolerance:
+        turn_right()
+
+    elif 960 + (960 * tolerance) > avgx1 > 960 or 960 + (960 * tolerance) > avgx2 > 960\
+            or abs(right_slope) < slope_tolerance:
+        turn_left()
+
+    else:
+        turn_straight()
+
+    # cv2.imshow('image', image)
+    # cv2.imshow('image2', processed_image)
 
 
 def run_screen_capture(region):
@@ -134,20 +238,22 @@ def run_screen_capture(region):
 
 
 if __name__ == "__main__":
-    cv2.namedWindow('image', cv2.WINDOW_NORMAL)
-    cv2.resizeWindow('image', 600, 600)
+    # cv2.namedWindow('image', cv2.WINDOW_NORMAL)
+    # cv2.resizeWindow('image', 600, 900)
+
     image = cv2.imread('car3.PNG')
     handle_image(image)
-    #cv2.imshow('image', image)
-    cv2.waitKey()
-    cv2.destroyAllWindows()
+    image = cv2.imread('car4.PNG')
+    handle_image(image)
+    image = cv2.imread('car5.PNG')
+    handle_image(image)
 
+    # cv2.imshow('image', image)
+    # cv2.waitKey()
+    # cv2.destroyAllWindows()
 
-    #region = (0, 40, 1920, 1120)
-    #run_screen_capture(region)
-    #cv2.imshow('image', cv2.imread('car3.PNG'))
-    # while True:
-    #     pass
-    #handle_image()
+    # PressKey(W)
+    # region = (0, 40, 1920, 1120)
+    # run_screen_capture(region)
 
 
