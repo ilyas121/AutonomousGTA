@@ -94,10 +94,11 @@ def roi(img, vertices):
     return masked
 
 def process_image(original_image):
-    processed_img = cv2.cvtColor(original_image, cv2.COLOR_BGR2GRAY)
-    processed_img = cv2.GaussianBlur(processed_img, (5,5), 0)
+    processed_img = cv2.cvtColor(original_image, cv2.COLOR_BGR2HSV)
+    processed_img = cv2.GaussianBlur(processed_img, (13,13), 0)
     processed_img = cv2.Canny(processed_img, threshold1 = 30, threshold2=150)
-    vertices = np.array([[120,1131], [642,564], [1278,573], [2008, 1115]])
+    #vertices = np.array([[-580,1120], [640,575], [1280,575], [2500, 1120]])
+    vertices = np.array([[0,860], [840,480], [1080,480], [1920, 860]])
     processed_img = roi(processed_img, [vertices] )
     lines = cv2.HoughLinesP(processed_img, 1, np.pi/180, 180, np.array([]), 150, 5)
     
@@ -120,19 +121,13 @@ def run_screen_capture(region):
 
 
 if __name__ == "__main__":
-
-    parser = argparse.ArgumentParser(description='Lawl')
-    parser.add_argument('file', metavar='file',  nargs=1, help='you need more than help my friend')
-
-    args = parser.parse_args()
-    file_ = args.file[0]
-
+    '''
     cv2.namedWindow('image', cv2.WINDOW_NORMAL)
     cv2.resizeWindow('image', 600,600)
-    cv2.imshow('image', process_image(cv2.imread(file_)))
+    cv2.imshow('image', process_image(cv2.imread('car3.PNG')))
     cv2.waitKey()
     cv2.destroyAllWindows()
     '''
     region = (0,40, 1920, 1120)
     run_screen_capture(region)
-    '''
+
