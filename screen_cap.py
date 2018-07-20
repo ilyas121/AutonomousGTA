@@ -34,9 +34,9 @@ def average_slope_intercept(lines):
         left_lane  = np.dot(left_weights,  left_lines) /np.sum(left_weights)  if len(left_weights) >0 else None
         right_lane = np.dot(right_weights, right_lines)/np.sum(right_weights) if len(right_weights)>0 else None
         
-        return left_lane, right_lane # (slope, intercept), (slope, intercept)
+        return left_lane, right_lane  # (slope, intercept), (slope, intercept)
     except:
-        return (1,1), (1,1)
+        return (1, 1), (1, 1)
 
 
 def make_line_points(y1, y2, line):
@@ -58,7 +58,7 @@ def make_line_points(y1, y2, line):
         
     except:
         # return garbage
-        return (2,2), (3,3)
+        return (2, 2), (3, 3)
 
 
 def lane_lines(image, lines):
@@ -247,21 +247,21 @@ def run_screen_capture(region):
 
 
 if __name__ == "__main__":
-    cv2.namedWindow('image', cv2.WINDOW_NORMAL)
-    cv2.resizeWindow('image', 1600, 900)
+    # cv2.namedWindow('image', cv2.WINDOW_NORMAL)
+    # cv2.resizeWindow('image', 1600, 900)
+    #
+    # image = cv2.imread('car3.PNG')
+    # handle_image(image)
+    # image = cv2.imread('car4.PNG')
+    # handle_image(image)
+    # image = cv2.imread('car5.PNG')
+    # handle_image(image)
+    #
+    # cv2.waitKey()
+    # cv2.destroyAllWindows()
 
-    image = cv2.imread('car3.PNG')
-    handle_image(image)
-    image = cv2.imread('car4.PNG')
-    handle_image(image)
-    image = cv2.imread('car5.PNG')
-    handle_image(image)
-
-    cv2.waitKey()
-    cv2.destroyAllWindows()
-
-    # PressKey(W)
-    # region = (0, 40, 1920, 1120)
-    # run_screen_capture(region)
+    PressKey(W)
+    region = (0, 40, 1920, 1120)
+    run_screen_capture(region)
 
 
