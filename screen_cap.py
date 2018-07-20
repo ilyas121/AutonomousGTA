@@ -77,7 +77,7 @@ def draw_lines(img, lines):
     try:
         for line in lines:
             coords = line[0]
-            cv2.line(img, (coords[0],coords[1]), (coords[2],coords[3]), [0,0,255], 3)
+            cv2.line(img, (coords[0], coords[1]), (coords[2], coords[3]), [0, 0, 255], 3)
     except:
         pass
 
@@ -88,9 +88,19 @@ def draw_lanes(img, lines):
         for line in list(lines):
             # print("Coords" + str(line))
             coords = line
-            cv2.line(img, line[0], line[1], [255,0, 0], 3)
+            cv2.line(img, line[0], line[1], [255, 0, 0], 3)
     except:
         pass
+
+
+def display_image(image_to_display):
+    cv2.namedWindow('image', cv2.WINDOW_NORMAL)
+    cv2.resizeWindow('image', 1600, 900)
+
+    cv2.imshow('image', image_to_display)
+    cv2.waitKey()
+
+    cv2.destroyAllWindows()
 
 
 def roi(img, vertices):
@@ -204,9 +214,9 @@ def handle_image(image):
     slope_tolerance = math.tan(20)
     tolerance = 0.2
 
-    print("Slope1: {}".format(slope1))
+    print("Slope1: {}".format(abs(slope1)))
     print("AvgX1: {}".format(avgx1))
-    print("Slope2: {}".format(slope2))
+    print("Slope2: {}".format(abs(slope2)))
     print("AvgX2: {}".format(avgx2))
 
     if 960 - (960 * tolerance) < avgx1 < 960 or 960 - (960 * tolerance) < avgx2 < 960\
@@ -220,8 +230,7 @@ def handle_image(image):
     else:
         turn_straight()
 
-    # cv2.imshow('image', image)
-    # cv2.imshow('image2', processed_image)
+    display_image(processed_image)
 
 
 def run_screen_capture(region):
@@ -238,8 +247,8 @@ def run_screen_capture(region):
 
 
 if __name__ == "__main__":
-    # cv2.namedWindow('image', cv2.WINDOW_NORMAL)
-    # cv2.resizeWindow('image', 600, 900)
+    cv2.namedWindow('image', cv2.WINDOW_NORMAL)
+    cv2.resizeWindow('image', 1600, 900)
 
     image = cv2.imread('car3.PNG')
     handle_image(image)
@@ -248,9 +257,8 @@ if __name__ == "__main__":
     image = cv2.imread('car5.PNG')
     handle_image(image)
 
-    # cv2.imshow('image', image)
-    # cv2.waitKey()
-    # cv2.destroyAllWindows()
+    cv2.waitKey()
+    cv2.destroyAllWindows()
 
     # PressKey(W)
     # region = (0, 40, 1920, 1120)
