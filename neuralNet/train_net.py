@@ -55,6 +55,9 @@ for e in range(EPOCHS):
             
             train = train_data[:50]
             test = test_data[:50]
+           
+            test_x = np.array([i[0] for i in test]).reshape(-1,WIDTH,HEIGHT,3)
+            test_y = [i[1] for i in test]
             
             model.fit({'input': X}, {'targets': Y}, n_epoch=1, validation_set=({'input': test_x}, {'targets': test_y}), 
                 snapshot_step=2500, show_metric=True, run_id=MODEL_NAME)	
