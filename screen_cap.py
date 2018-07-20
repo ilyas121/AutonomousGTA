@@ -45,12 +45,16 @@ def make_line_points(y1, y2, line):
     slope, intercept = line
     
     # make sure everything is integer as cv2.line requires it
-    x1 = int((y1 - intercept)/slope)
-    x2 = int((y2 - intercept)/slope)
-    y1 = int(y1)
-    y2 = int(y2)
-    
-    return ((x1, y1), (x2, y2))
+    try:
+        x1 = int((y1 - intercept)/slope)
+        x2 = int((y2 - intercept)/slope)
+        y1 = int(y1)
+        y2 = int(y2)
+        return ((x1, y1), (x2, y2))
+        
+    except:
+        #return garbage
+        return ((2,2), (3,3))
 
 
 def lane_lines(image, lines):
@@ -91,8 +95,8 @@ def roi(img, vertices):
 
 def process_image(original_image):
     processed_img = cv2.cvtColor(original_image, cv2.COLOR_BGR2GRAY)
-    processed_img = cv2.GaussianBlur(processed_img, (15,15), 0)
-    processed_img = cv2.Canny(processed_img, threshold1 = 50, threshold2=100)
+    processed_img = cv2.GaussianBlur(processed_img, (5,5), 0)
+    processed_img = cv2.Canny(processed_img, threshold1 = 30, threshold2=150)
     vertices = np.array([[120,1131], [642,564], [1278,573], [2008, 1115]])
     processed_img = roi(processed_img, [vertices] )
     lines = cv2.HoughLinesP(processed_img, 1, np.pi/180, 180, np.array([]), 150, 5)
@@ -116,9 +120,16 @@ def run_screen_capture(region):
 
 
 if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser(description='Lawl')
+    parser.add_argument('file', metavar='file',  nargs=1, help='you need more than help my friend')
+
+    args = parser.parse_args()
+    file_ = args.file[0]
+
     cv2.namedWindow('image', cv2.WINDOW_NORMAL)
     cv2.resizeWindow('image', 600,600)
-    cv2.imshow('image', process_image(cv2.imread('car3.PNG')))
+    cv2.imshow('image', process_image(cv2.imread(file_)))
     cv2.waitKey()
     cv2.destroyAllWindows()
     '''
