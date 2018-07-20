@@ -78,10 +78,10 @@ def draw_lines(img, lines):
         pass
 
 def draw_lanes(img, lines):
-    print(lines)
+    #print(lines)
     try:
         for line in list(lines):
-            print("Coords" + str(line))
+            #print("Coords" + str(line))
             coords = line
             cv2.line(img, line[0], line[1], [255,0, 0], 3)
     except:
@@ -99,35 +99,55 @@ def process_image(original_image):
     processed_img = cv2.Canny(processed_img, threshold1 = 30, threshold2=150)
     #vertices = np.array([[-580,1120], [640,575], [1280,575], [2500, 1120]])
     vertices = np.array([[0,860], [840,480], [1080,480], [1920, 860]])
-    processed_img = roi(processed_img, [vertices] )
-    lines = cv2.HoughLinesP(processed_img, 1, np.pi/180, 180, np.array([]), 150, 5)
-    
-    lanes = lane_lines(processed_img, lines)
-    draw_lines(processed_img, lines)
+    processed_img = roi(processed_img, [vertices])
 
-    draw_lanes(processed_img, lanes)
     return processed_img
 
+def get_lines(img):
+    return cv2.HoughLinesP(img, 1, np.pi / 180, 180, np.array([]), 150, 5)
+
+def handle_image(image):
+    processed_image = process_image(np.array(image))
+    lines = get_lines(processed_image)
+    lanes = lane_lines(processed_image, lines)
+
+    draw_lines(processed_image, lines)
+    draw_lanes(processed_image, lanes)
+
+    print(lanes)
+
+    cv2.imshow('image', image)
+    cv2.imshow('image2', processed_image)
+
+
 def run_screen_capture(region):
-    while(True):
+    while True:
         start = time.time()
         image = pyautogui.screenshot(region=region)
         print("Time took: {}".format(time.time() - start))
-        
-        cv2.imshow('image', process_image(np.array(image)))
+
+        handle_image(image)
+
         if cv2.waitKey(25) & 0xFF == ord('q'):
             cv2.destroyAllWindows()
             break
 
 
 if __name__ == "__main__":
-    '''
     cv2.namedWindow('image', cv2.WINDOW_NORMAL)
-    cv2.resizeWindow('image', 600,600)
-    cv2.imshow('image', process_image(cv2.imread('car3.PNG')))
+    cv2.resizeWindow('image', 600, 600)
+    image = cv2.imread('car3.PNG')
+    handle_image(image)
+    #cv2.imshow('image', image)
     cv2.waitKey()
     cv2.destroyAllWindows()
-    '''
-    region = (0,40, 1920, 1120)
-    run_screen_capture(region)
+
+
+    #region = (0, 40, 1920, 1120)
+    #run_screen_capture(region)
+    #cv2.imshow('image', cv2.imread('car3.PNG'))
+    # while True:
+    #     pass
+    #handle_image()
+
 
